@@ -1,0 +1,762 @@
+<?xml version="1.0"?>
+
+<project name="halcyon_glaze" basedir="." default="help">
+
+  <description>
+    ANT build file for HALCYON GLAZE.
+
+    Requirements:
+      1. Java5 compiler (no target switch required)
+      2. An SQL server (if running locally)
+      3. All libraries of compile.classpath
+  </description>
+
+
+  <target name="help">
+    <echo>
+    H A L C Y O N  G L A Z E
+    	
+    Built by Brien Colwell and Jeffrey Heer, 2005-2006 at UC Berkeley and beyond
+    	
+    Targets:  [build]
+              [dist]
+              [clean]
+    </echo>
+  </target>
+
+
+  <!--
+  PROPERTIES
+  -->
+
+  <!-- Load build properties from "build.properties". -->
+  <property file="build.properties"/>
+
+  <property name="build.dir" value="build"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="bootstrap.classes.dir" value="${classes.dir}"/>
+  	<!-- value="${build.dir}/bootstrap_classes"/> -->
+  <property name="src.dir" value="src"/>
+  <property name="java.src.dir" value="${src.dir}/java"/>
+
+  <!-- TODO -->
+  <property name="obfustication.log" value="obf.log"/>
+
+
+  <property name="jar.file" value="${build.dir}/hg_${version}.jar"/>
+  <property name="bootstrap.jar.file" value="${build.dir}/bootstrap.jar"/>
+  <property name="dist.jar.file" value="${build.dir}/hg_${version}_dist.jar"/>
+
+
+  <property name="sign.alias" value="HALCYON_GLAZE"/>
+  <property name="sign.store.password" value="HALCYON_GLAZE"/>
+
+
+  <property name="manifest.file" value="manifest"/>
+
+  <!--
+    END PROPERTIES
+    -->
+
+
+  <!--
+    PATHS
+    -->
+
+  <path id="jp2k.classpath">
+    <fileset dir="lib/jj2000">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="concurrent.classpath">
+    <fileset dir="lib/concurrent">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="groovy.classpath">
+    <fileset dir="lib/groovy">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="junit.classpath">
+    <fileset dir="lib/junit">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="retrotranslator.classpath">
+    <fileset dir="lib/retrotranslator">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="servlet.classpath">
+    <fileset dir="lib/servlet">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="yguard.classpath">
+    <fileset dir="lib/yguard">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="mysql.classpath">
+    <fileset dir="lib/mysql">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="log4j.classpath">
+    <fileset dir="lib/log4j">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="piccolo.classpath">
+    <fileset dir="lib/piccolo">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+
+  <path id="build.path">
+  	<pathelement location="${classes.dir}"/>
+  </path>
+	
+  <path id="run.classpath">
+    <path refid="build.path"/>
+    <path refid="concurrent.classpath"/>
+    <path refid="junit.classpath"/>
+    <path refid="servlet.classpath"/>
+    <path refid="retrotranslator.classpath"/>
+    <path refid="mysql.classpath"/>
+    <path refid="log4j.classpath"/>
+    <path refid="jp2k.classpath"/>
+    <path refid="piccolo.classpath"/>
+  </path>
+
+  <path id="compile.classpath">
+    <path refid="run.classpath"/>
+    <path refid="yguard.classpath"/>
+  	<path refid="groovy.classpath"/>
+  </path>
+	
+  <path id="retro.verify.classpath">
+    <path refid="compile.classpath"/>
+    <pathelement location="${target.java.home}/jre/lib/rt.jar"/>
+  </path>
+
+  <!--
+    END PATHS
+    -->
+
+
+  <!--
+    CUSTOM TASKS
+    -->
+  <!--
+  <taskdef name="obfuscate"
+    classname="com.yworks.yguard.ObfuscatorTask"
+    classpath="${compile.classpath}"/>
+
+    -->
+	<!--
+  <taskdef name="retrotranslate"
+    classname="net.sf.retrotranslator.transformer.RetrotranslatorTask"
+    classpath="${retro.verify.classpath}"/>
+-->
+	
+  <taskdef name="groovy" 
+ 	classname="org.codehaus.groovy.ant.Groovy"
+    classpathref="compile.classpath"/>
+	
+  <!--
+    END CUSTOM TASKS
+    -->
+
+
+  <!--
+    TARGETS
+    -->
+
+  <!-- Cleans the distribution. -->
+  <target name="clean">
+    <delete dir="${build.dir}" includeemptydirs="true"/>
+  </target>
+
+
+  <target name="init">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${classes.dir}"/>
+  </target>
+
+  <!-- compile from sources in src.dir -->
+  <target name="compile" depends="init">
+    <javac srcdir="${java.src.dir}" destdir="${classes.dir}"
+      classpathref="compile.classpath"
+      source="1.5" target="1.5"
+      optimize="true"/>
+
+  </target>
+
+  <target name="retro" depends="compile">
+    <retrotranslate srcdir="${classes.dir}" verify="${retro.verify}" />
+  </target>
+
+  <target name="copyFiles">
+    <copy todir="${classes.dir}">
+      <fileset dir="${java.src.dir}">
+        <include name="**/*.txt"/>
+        <include name="**/*.xml"/>
+        <include name="**/*.properties"/>
+      </fileset>
+    </copy>
+  </target>
+
+
+  <!-- Note: was dep. on retro -->
+  <target name="internalBuild" depends="compile, copyFiles, flattenLibs">
+    <!-- Create the manifest file: -->
+    <groovy>
+      import java.io.*;
+
+      // Manifest properties: {
+      def mainClass = project.getProperty( "main.class" )
+      def manFilePath = project.getProperty( "manifest.file" )
+      // }
+
+      def manFile = new File( manFilePath )
+      if ( manFile.exists() ) {
+        println( "Manifest file \"${manFilePath}\" already exists. Using it." )
+      }
+      else {
+        println( "Creating temporary manifest file \"${manFilePath}\"." )
+    	project.setProperty( "deleteManFile", "true" )
+
+        OutputStream os = new FileOutputStream( manFile )
+        PrintStream ps = new PrintStream( os )
+        try {
+          ps.println( "Main-Class: ${mainClass}" )
+          ps.println()
+          ps.flush()
+        }
+        finally {
+          ps.close()
+        }
+
+      }
+    </groovy>
+
+    <jar jarfile="${jar.file}" basedir="${classes.dir}" manifest="manifest"/>
+
+    <!-- Remove the manifest file: -->
+    <groovy>
+      if ( project.getProperty( "deleteManFile" ) ) {
+        def manFilePath = project.getProperty( "manifest.file" )
+        println( "Deleting manifest file \"${manFilePath}\"." )
+        new File( manFilePath ).delete()
+      }
+    </groovy>
+
+    <!--<signjar jar="${jar.file}" alias="${sign.alias}" storepass="${sign.store.password}"/>-->
+  </target>
+
+
+  <!-- TODO: this currently is wrong. lots of warning ... -->
+  <!--
+  <target name="obfusticate" depends="internalBuild">
+    <obfuscate mainclass="${main.class}" logfile="${obfustication.log}">
+      <property name="error-checking" value="pedantic"/>
+      <inoutpair in="${jar.file}" out="${dist.jar.file}"/>
+    </obfuscate>
+
+    <signjar jar="${dist.jar.file}" alias="${sign.alias}" storepass="${sign.store.password}"/>
+  </target>
+  -->
+	
+  <!--
+    Sets up the system libraries and generates a properties file
+    readable by <code>BootstrapApplet</code>.
+    
+  -->
+  <target name="libs">
+  	<mkdir dir="${bootstrap.classes.dir}/lib"/>
+  	<mkdir dir="${bootstrap.classes.dir}/config"/>
+  	
+  	<!-- Copy the main program JAR as "0.jar" -->
+  	<copy file="${jar.file}" tofile="${bootstrap.classes.dir}/lib/0.jar"/>
+  	
+  	<groovy>
+  		import java.io.*;
+  		
+  		// Look at "run.classpath"
+		def libs = []
+  		
+  		project.getReference( "run.classpath" ).list().each { pe ->
+  			if ( pe.endsWith( ".jar" ) )
+  				libs.add( pe )
+	  	}
+  		
+  		// Copy these to the build lib directory
+  		def buildDir = project.getProperty( "bootstrap.classes.dir" )
+  		if ( buildDir.endsWith( "\\" ) || buildDir.endsWith( "/" ) )
+  			buildDir = buildDir.subString( 0, buildDir.length() - 1 )
+  		
+  		def destDir = project.getProperty( "lib.dir" )
+  		if ( destDir.endsWith( "\\" ) || destDir.endsWith( "/" ) )
+  			destDir = destDir.subString( 0, destDir.length() - 1 )
+  		
+  		def noisy = "true".equalsIgnoreCase( project.getProperty( "noisy" ) )
+  		
+  		def minJava = project.getProperty( "min_java" )
+  		
+  		def copyLibs = !"false".equals( project.getProperty( "copy_libs" ) )
+  		
+  		// The properties file contents:
+  		def pcontents = ""
+  		
+  		if ( minJava )
+  			pcontents += "min-java = ${minJava}\n\n"
+  		
+  		pcontents += "lib0 = 0.jar\n\n"
+  		
+  		def i = 1
+  		libs.each { pe ->
+  			// Copy the libraries and create the properties file body in one sweep:
+  			def dest = buildDir + File.separator + destDir + File.separator + i + ".jar"
+  		
+  			if ( copyLibs ) {
+	  			if ( noisy )
+	  				println "Copying \"${pe}\" to \"${dest}\" ..."
+	  			project.copyFile( pe, dest )
+  			}
+  		
+  			pcontents += "lib${i} = ${i}.jar\n#${pe}\n\n"
+  			i++
+  		}
+  		
+  		// Update the lib properties file:
+  		def pheader = 
+"""# HALCYON GLAZE  library properties
+# IMPORTANT: This file is automatically generated. 
+# IMPORTANT: Changes made here will be erased on the next build! 
+"""
+  		
+  		def pdir = project.getProperty( "bootstrap.classes.dir" )
+  		if ( pdir.endsWith( "\\" ) || pdir.endsWith( "/" ) )
+  			pdir = pdir.subString( 0, pdir.length() - 1 )
+  		
+  		def lfile = new File( pdir + File.separator + project.getProperty( "lib.properties" ) )
+  		lfile.write( pheader )
+  		lfile.append( pcontents )
+  	</groovy>
+  </target>
+
+  <target name="flattenLibs">
+  	<mkdir dir="${classes.dir}"/>
+  	<groovy>
+  		import java.io.*;
+  		import java.util.zip.*;
+  		import java.util.jar.*;
+  		
+  		
+  		def copyBinary(isDir, dfile, is) {
+  			def file = new File( dfile )
+	  	
+  			if ( isDir ) {
+  				file.mkdirs()
+  			}
+  			else {
+  				def preIndex = Math.max( dfile.lastIndexOf( "/" ), dfile.lastIndexOf( "\\" ) )
+  				if ( preIndex > 0 )
+  					new File( dfile.substring( 0, preIndex + 1 ) ).mkdirs()
+  				
+	  			def fout = new BufferedOutputStream( new FileOutputStream( file ) )
+	  			
+	  			try {
+		  			byte[] buffer = new byte[ 1024 ]
+	  				int i
+		  			while ( ( i = is.read( buffer, 0, buffer.length ) ) > 0 )
+		  				fout.write( buffer, 0, i )
+  					fout.close()
+	  			}
+	  			finally {
+	  				fout.close()
+	  			}
+  			}
+  		}
+  		
+  		
+  		def destDir = project.getProperty( "classes.dir" )
+  		if ( destDir.endsWith( "\\" ) || destDir.endsWith( "/" ) )
+  			destDir = destDir.subString( 0, destDir.length() - 1 )
+  		
+  		
+  		// Look at "run.classpath"
+		def libs = []
+  		
+  		project.getReference( "run.classpath" ).list().each { pe ->
+  			if ( pe.endsWith( ".jar" ) )
+  				libs.add( pe )
+	  	}
+  		
+  		
+  		def noisy = "true".equalsIgnoreCase( project.getProperty( "noisy" ) )
+  		
+  		// Copy:
+  		libs.each { lib ->
+  			def jfile = new JarFile( new File( lib ) )
+	
+  			def e = jfile.entries()
+  			while ( e.hasMoreElements() ) {
+  				def entry = e.nextElement()
+  				def name = entry.getName()
+  		
+  				if ( noisy )
+  					println "Copying \"${name}\" ..."
+  		
+  				def is = new BufferedInputStream( jfile.getInputStream( entry ) )
+  				try {
+  					copyBinary( entry.isDirectory(), "${destDir}/${name}", is )
+  				}
+  				finally {
+  					is.close()
+  				}
+  			}
+  		}
+  	</groovy>
+  </target>
+	
+	
+  <!--
+    Sets up SQL properties and calls off to "sqlSetup" to ensure the DB is properly initialized.
+  -->
+  <target name="sql">
+  	<mkdir dir="${bootstrap.classes.dir}/config"/>
+  	<groovy>
+  		import java.io.*;
+  		import java.util.*;
+  		
+  		def input(def prompt) {
+  		  return input( prompt, null )
+  		}
+  		
+  		def input(def prompt, def defaultValue) {
+  		  println( prompt + ( null != defaultValue ? "    [ENTER for \"${defaultValue}\"]" : "" ) )
+		  def c = System.in.readLine().trim()
+  		  return ( 0 != c.length() || null == defaultValue ) ? c : defaultValue
+  		}
+  		
+  		
+  		def isKnownType(type) {
+  		  return true
+  		}
+  		
+  		def getSuggestString() {
+  		  return ""
+  		}
+  		
+  		
+  		def 
+  		    host = "resist-the-b.org", 
+  			db, 
+  			dbms = "mysql",
+  			port = "3306",
+  			table, rtable, rstable, ctable, cstable,
+  			user = "pinstripe",
+  			pass = "1am-tranxaktional"
+  		
+  		def pdir = project.getProperty( "bootstrap.classes.dir" )
+  		if ( pdir.endsWith( "\\" ) || pdir.endsWith( "/" ) )
+  			pdir = pdir.subString( 0, pdir.length() - 1 )
+  		
+		def sqlpFile = new File( pdir + File.separator + project.getProperty( "sql.properties" ) )
+  		def useExisting
+  		if (! sqlpFile.exists() )
+  			useExisting = false;
+  		else {
+  			def Properties sqlp = new Properties()	
+  			sqlp.load( sqlpFile.newInputStream() )
+  		
+			host = sqlp.getProperty( "host" )
+			port = sqlp.getProperty( "port" )
+  			db = sqlp.getProperty( "db" )
+  			dbms = sqlp.getProperty( "dbms" )
+  			table = sqlp.getProperty( "table" )
+  			rtable = sqlp.getProperty( "rtable" )
+  			rstable = sqlp.getProperty( "rstable" )
+  			ctable = sqlp.getProperty( "ctable" )
+  			cstable = sqlp.getProperty( "cstable" )
+  			user = sqlp.getProperty( "user" )
+  			pass = sqlp.getProperty( "pass" )
+  		
+  			println """Found an existing SQL properties file:
+
+  host:       \"${host}\"
+  port:       \"${port}\"
+  db:         \"${db}\"
+  dbms:       \"${dbms}\"
+  table:      \"${table}\"
+  rtable:     \"${rtable}\"
+  rstable:    \"${rstable}\"
+  ctable:     \"${ctable}\"
+  cstable:    \"${cstable}\"
+  user:       \"${user}\"
+  pass:       \"${pass}\"
+"""
+  		
+  			def c = input( "Do you want to use these SQL properties?", "y" )
+  			useExisting = c.toLowerCase().startsWith( "y" )
+  		}
+  		
+  		if (! useExisting ) {
+  			println "We are now going to generate an SQL properties file. Please enter the following information ...\n\n"
+  		
+  			host = input( "Host", host )
+  			db = input( "Database", db )
+  		    
+  			while (! isKnownType( 
+  				dbms = input( "Database Management System, e.g. mysql or postgresql", dbms ) 
+  			) ) {
+  				println "Unknown DBMS type \"${dbms}\". Perhaps try one of ${getSuggestString()}."
+  			}
+  		
+  			port = input( "Port", port )
+  		
+  		    table = input( "Table", table )
+  		    rtable = input( "Read logging table", null == rtable ? table + "_r" : rtable )
+  		    rstable = input( "Read logging summary table", null == rstable ? table + "_rs" : rstable )
+  		    ctable = input( "Create logging table", null == ctable ? table + "_c" : ctable )
+  			cstable = input( "Create logging summary table", null == cstable ? table + "_cs" : cstable )
+  			user = input( "User", user )
+  			pass = input( "Password", pass )
+  		
+  			sqlpFile.write( 
+"""
+# HALCYON GLAZE  SQL properties
+host = ${host}
+port = ${port}
+db = ${db}
+dbms = ${dbms}
+table = ${table}
+rtable = ${rtable}
+rstable = ${rstable}
+ctable = ${ctable}
+cstable = ${cstable}
+user = ${user}
+pass = ${pass}
+""" 
+  			)
+  		}
+  		
+  		// Set an internal property to point to the SQL properties file (will be passed to another task):
+  		project.setProperty( "sql.internalPropertiesFile", sqlpFile.getPath() )
+  	</groovy>
+  	
+  	<antcall target="sqlSetup">
+  		<param name="sqlPropertiesFile" value="${sql.internalPropertiesFile}"/>
+  	</antcall>
+  </target>
+	
+	
+  <!--
+    Ensures the given SQL properties file is properly setup on the DB specified.
+  -->
+  <target name="sqlSetup">
+  	<groovy>
+  		import java.io.*;
+  		import java.util.*;
+  		
+  		
+  		def getScriptForDb(dbms) {
+  			// TODO: for now, use MySQL always
+  			return new File( "src/sql/init_mysql.sql" ).getText()
+  		}
+  		
+  		
+  		def input(def prompt) {
+  		  return input( prompt, null )
+  		}
+  		
+  		def input(def prompt, def defaultValue) {
+  		  println( prompt + ( null != defaultValue ? "    [ENTER for \"${defaultValue}\"]" : "" ) )
+		  def c = System.in.readLine().trim()
+  		  return ( 0 != c.length() || null == defaultValue ) ? c : defaultValue
+  		}
+  		
+  		
+  		def now = input( "Do you want to setup the SQL database now?", "n" )
+  		
+  		if ( now.toLowerCase().startsWith( "y" ) ) {
+	  		// TODO: check whether this property is present; if not, use the system default
+	  		def sqlpFile = project.getProperty( "sqlPropertiesFile" )
+	  		
+	  		def sqlp = new Properties()
+	  		sqlp.load( new File( sqlpFile ).newInputStream() )
+	  		
+	  		def
+	  			host = sqlp.getProperty( "host" ),
+	  			port = sqlp.getProperty( "port" ),
+	  			user = sqlp.getProperty( "user" ),
+	  			pass = sqlp.getProperty( "pass" ),
+	  			db = sqlp.getProperty( "db" ),
+	  			table = sqlp.getProperty( "table" ),
+	  			rtable = sqlp.getProperty( "rtable" ),
+	  			rstable = sqlp.getProperty( "rstable" ),
+	  			ctable = sqlp.getProperty( "ctable" ),
+	  			cstable = sqlp.getProperty( "cstable" )
+	  		
+			def runSql = getScriptForDb( db 
+	  			).replace( "%user%", "${user}" 
+	  			).replace( "%pass%", "${pass}"
+	  			).replace( "%db%", "${db}"
+	  			).replace( "%table%", "${table}"
+	  			).replace( "%rtable%", "${rtable}"
+	  			).replace( "%rstable%", "${rstable}" 
+	  			).replace( "%ctable%", "${ctable}" 
+	  			).replace( "%cstable%", "${cstable}" )
+		
+	  		println "The SQL setup script is now ready to modify your database. Please provide the following login credentials."
+	  		  		
+	  		def
+	  			suser = input( "Super user (must have db create, table create, and grant prilileges)" ),
+	  			spass = input( "Password (NOTE: THIS IS NOT HIDDEN ON THE SCREEN)" )
+	  		  		
+	  		
+	  		// Run the sql:
+			def rsFile = new File( "sqlSetup.internalRunSql.sql" )
+	  		
+	  		def go = true
+	  		if ( rsFile.exists() ) {
+	  			println "ERROR: sql setup file \"sqlSetup.internalRunSql.sql\" already exists! This is possibly due to an incomplete previous build."
+	  			def c = input( "Do you want to override the file?", "n" )
+	  			go = c.toLowerCase().startsWith( "y" )
+	  		}
+	  		
+	  		if (! go )
+	  			throw new RuntimeException( "Will not overwrite existing SQL file." )
+	  		else
+	  			rsFile.write( runSql )
+	  		
+	  		project.setProperty( "sqlSetup.internalUrl", "jdbc:mysql://${host}:${port}/${db}" )
+	  		project.setProperty( "sqlSetup.internalSUser", suser )
+	  		project.setProperty( "sqlSetup.internalSPass", spass )
+  		
+  		 	// Pass off to the continuation ...
+  			project.getTargets()[ "sqlSetup_continue" ].execute()
+  		}
+  	</groovy>
+  	
+  	
+  	
+  </target>
+	
+  <target name="sqlSetup_continue">
+  	
+  	<sql 
+  		driver="com.mysql.jdbc.Driver" 
+  		classpathref="compile.classpath"
+  		url="${sqlSetup.internalUrl}" 
+  		userid="${sqlSetup.internalSUser}" 
+  		password="${sqlSetup.internalSPass}" 
+  		src="sqlSetup.internalRunSql.sql" 
+  	
+  		onerror="continue"
+  		/>
+  	
+  	<groovy>
+  		// Cleanup:
+  		new File( "sqlSetup.internalRunSql.sql" ).delete()
+  	</groovy>
+  </target>
+	
+	
+  <target name="buildBootstrap" depends="internalBuild, libs, sql">
+  	<mkdir dir="${bootstrap.classes.dir}/bootstrap/"/>
+  	
+  	<copy file="${classes.dir}/bootstrap/BootstrapApplet.class" todir="${bootstrap.classes.dir}/bootstrap/"/>
+  	<copy file="${classes.dir}/config/ConfigSignpost.class" todir="${bootstrap.classes.dir}/config/"/>
+  	<copy file="${classes.dir}/lib/LibSignpost.class" todir="${bootstrap.classes.dir}/lib/"/>
+  	
+  	<jar destfile="${bootstrap.jar.file}" basedir="${bootstrap.classes.dir}" compress="true"/>
+  </target>
+	
+	
+  <target name="build" depends="internalBuild">
+  </target>
+
+  <target name="buildSql" depends="sql">
+  </target>
+
+  <!-- export to tomcat, setup database, etc. tomcatDeploy, tomcatRestart -->
+  <target name="dist" depends="build, buildSql">
+  </target>
+
+  <!--
+    END TARGETS
+    -->
+
+
+  <!--
+    UTILITY TARGETS
+    -->
+
+	<!-- this should also copy the web.xml file(s). might need multiple tomcat deploys -->
+	  <target name="tomcatDeploy" depends="build">
+	    <copy file="${jar.file}" todir="${tomcat.deploy.dir}"/>
+
+
+	  </target>
+
+	  <target name="tomcatRestart">
+	    <!-- Restart Tomcat (hard stop then start) -->
+	    <!--<script language="groovy">-->
+	      <!--// Properties: {-->
+	      <!--def tomcatService = halcyon_glaze.getProperty( "tomcat.service.name" )-->
+	      <!--// }-->
+	<!-- -->
+	      <!--println( "Stopping Tomcat service \"${tomcatService}\" ..." )-->
+	      <!--Runtime.exec( (String[]) [ "sc", "stop", tomcatService ].toArray( new String[ 3 ] ) ).waitFor()-->
+	      <!--println( "Starting Tomcat service \"${tomcatService}\" ..." )-->
+	      <!--Runtime.exec( (String[]) [ "sc", "start", tomcatService ].toArray( new String[ 3 ] ) ).waitFor()-->
+	<!-- -->
+	    <!--</script>-->
+	  </target>
+	
+  <!-- Opens the yGuard de-obfustication utility, which can be used to:
+    -  Track obfustication changes
+    -  De-obfusticate stack traces
+    -->
+  <target name="deobf">
+    <!-- java -jar yguard.jar mylogfile.xml.gz -->
+    <java jar="lib/yguard/1.5.0_03/yguard_1.5.0_03.jar" fork="true"
+      classpath="compile.classpath">
+      <arg value="${obfustication.log}"/>
+    </java>
+  </target>
+
+
+  <!--
+  <target name="cmd2sql">
+    <java classname="edu.berkeley.guir.tiling.mr.image.CmdToSql"
+      classpathref="cmd2sql.classpath">
+      <arg value="${heap.file}"/>
+      <arg value="${db.table}"/>
+      <arg value="${db.host}"/>
+      <arg value="${db.user}"/>
+      <arg value="${db.password}"/>
+    </java>
+  </target>
+  -->
+
+  <!--
+    END UTILITY TARGETS
+    -->
+
+</project>

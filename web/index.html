@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+
+<!--[if lt IE 7.]>
+<script defer type="text/javascript" src="resources/js/pngfix.js"></script>
+<![endif]-->
+
+<title>enter & re-exit</title>
+
+<style type="text/css">
+@import "resources/css/main.css";
+@import "resources/css/cells.css";
+</style>
+
+<script src="http://java.com/js/deployJava.js"></script>
+
+<script type="text/javascript" src="resources/js/prototype.js"></script>
+<script type="text/javascript" src="resources/js/json_support.js"></script>
+<script type="text/javascript" src="resources/js/browser_detect.js"></script>
+<script type="text/javascript" src="resources/js/cookies.js"></script>
+<script type="text/javascript" src="resources/js/fade.js"></script>
+<script type="text/javascript" src="resources/js/templates.js"></script>
+
+<script type="text/javascript" src="resources/js/ere_binding.js"></script>
+<script type="text/javascript" src="resources/js/main.js"></script>
+<script type="text/javascript" src="resources/js/gallery.js"></script>
+
+</head>
+
+
+<body>
+<!-- Use Sun's deployer JS to deploy the applet.
+ Note that this actually really sucks, as it will ask
+ users to download a JRE /with/ the Yahoo toolbar included.
+ AAARRGGG! I filed a complaint. Let's hope they improve.
+ -->
+<div id="applet"><script type="text/javascript">writeApplet()</script></div>
+<div id="main">
+<div id="status"></div>
+<!--
+<div id="warnings"><script type="text/javascript">writeWarnings()</script></div>
+-->
+
+<div id="login-box">
+	
+<div style="float: left;">
+<div><img id="enter_scenery" src="resources/images/camera_stencil.png" alt="click me to enter the current view"/></div>
+<div>^^ i'm just here for the scenery</div>
+</div>
+
+<div style="float: left; padding-left: 35px;">
+<div>name</div>
+<div><input id="name" type="text"></input></div>
+<div>location</div>
+<div><input id="loc" type="text" value=""></input></div>
+<div class="sb"><input type="button" id="enter" value="enter"/><input style="display: none;" type="button" id="enter_anon" value="enter as anonymous" /></div>
+</div>
+
+<div style="clear: both;"></div>
+
+</div>
+
+<div id="ere">
+<div class="logo"><img src="resources/images/ere_small.png"/></div>
+
+<div class="txt">
+<div class="title">statement</div>
+<div class="bl">this work invites you to explore how fragments of thoughts
+are reflected by an image popular culture. 
+in ere rhizomic strands reach out for the answer ... <i>what is the connection?</i>
+</div>
+<div class="title">controls</div>
+<div class="bl">[mouse click] to center + [mouse wheel or right-click drag] to zoom</div>
+<br/>
+</div>
+<div class="end"></div>
+<div class="txt">
+<div class="title"><a href="http://resisttheb.org">resisttheborg</a> 2007-2008</div>
+</div>
+<div class="end"></div>
+</div>
+
+<div id="cell-outer-container">
+<div class="title">recent connections (click to expand)</div>
+<!-- <div id="close"><a href="">close</a></div>
+-->
+<div id="cell-container"></div>
+<div class="end"></div>
+<div><a href="javascript: pull(3)">more</a></div>
+</div>
+
+</div>
+</body>
+
+
+</html>

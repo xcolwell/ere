@@ -1,0 +1,20 @@
+<applet id="xere" code="com.sun.opengl.util.JOGLAppletLauncher"
+      width="100%"
+      height="100%"
+      codebase="http://resisttheb.org/ere/lib/"
+      archive="jogl.jar;preload,gluegen-rt.jar;preload,ere_internal.jar;preload,substance-lite.jar"
+      mayscript="true" ${ATTRIBS_STRING}>
+      
+   ${PARAMS_STRING}
+   
+   <param name="mayscript" value="true"/>
+   
+   <param name="archive" value="jogl.jar;preload,gluegen-rt.jar;preload,ere_internal.jar;preload,substance-lite.jar"/>
+   <param name="codebase" value="http://resisttheb.org/ere/lib/"/>
+  
+   <param name="subapplet.classname" VALUE="org.resisttheb.ere.ui.Ere"/>
+   <param name="subapplet.displayname" VALUE="ENTER & RE-EXIT"/>
+   <param name="progressbar" value="true"/>
+   <param name="cache_archive" VALUE="jogl.jar,gluegen-rt.jar,ere_internal.jar,substance-lite.jar"/>
+   <param name="cache_archive_ex" VALUE="jogl.jar;preload,gluegen-rt.jar;preload,ere_internal.jar;preload,substance-lite.jar"/>
+ </applet>

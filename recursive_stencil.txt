@@ -1,0 +1,63 @@
+
+
+why are there lines in the big view?
+
+
+BUGS:
+- start focused on node closest to (0,0)
+- click in zoom mode ... shouldn't allow
+
+
+
+- use correct aspect ratio for recusive space
+- do a simple slide tonight
+- work on transition from graph to recursive tomorrow
+
+
+
+
+This is the real shit.
+Limited to depth 1,
+but we have room for a master stencil on the top of everything.
+
+must do infinite zoom tomorrow
+
+
+[node, blob] of focus
+
+at some point it's locked in
+
+grow out master "peeking hole"
+grow in the texture underneath
+
+
+
+
+
+
+
+
+
+
+
+
+recusrive stencil buffer
+
+[depth][id on depth]   [depth][id on depth]
+
+for layer0, first block is current
+for layer1, second block is current, first block is source
+
+we recusrively stencil this way
+
+
+use 4 bit depth, 8 bit id
+
+24 bit stencil
+
+
+
+rendering strategy --
+
+render at most M
+always render under the mouse

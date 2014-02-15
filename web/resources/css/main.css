@@ -1,0 +1,159 @@
+
+
+body {
+	margin: 0px;
+	background-color: rgb(0, 0, 0);
+	
+	overflow-x: hidden;
+
+	background-image: url('../images/bg_stripes.png');
+}
+
+/* for IE */
+html {
+	overflow-x: hidden;
+}
+
+::selection {
+	background: rgb(222, 224, 40);
+	color: rgb(0, 0, 0);
+	}
+::-moz-selection {
+	background: rgb(222, 224, 40);
+	color: rgb(0, 0, 0);
+}
+
+
+a[href] {
+	color: rgb(163, 164, 225);
+	text-decoration: none;
+	border: 1px dotted rgb(110, 26, 0);
+	padding: 1px;
+}
+
+a[href]:hover {
+	background-image: url('../images/bg_r.png');
+}
+
+
+div.end {
+clear: both;
+}
+
+
+input[type=text] {
+	font-family: verdana, sans-serif;
+	font-size: 12px;
+	width: 200px;
+}
+
+input[type=text]:focus {
+}
+
+input[type=text]:hover {
+}
+
+input[type=button] {
+font-family: verdana, sans-serif;
+	font-size: 12px;
+}
+
+
+
+
+#applet {
+position: absolute;
+left: 100%;
+top: 0px;
+width: 100%;
+height: 99%;
+}
+
+#main {
+/*
+position: absolute;
+left: 0px;
+top: 0px;
+width: 100%;
+height: 100%;
+*/
+
+}
+
+
+#status {
+font-family: verdana, sans-serif;
+	font-size: 10px;
+	margin: 5px;
+	margin-bottom: 10px;
+	
+	color: rgb(210, 210, 210);
+}
+
+#warnings {
+font-family: verdana, sans-serif;
+	font-size: 10px;
+	margin: 5px;
+	margin-bottom: 10px;
+	
+	color: rgb(207, 43, 11);
+}
+
+
+#login-box {
+background-image: url('../images/bg_y.png');
+	padding: 20px;
+	padding-left: 40px;
+	border-top: 1px dotted rgb(222, 224, 40);
+	border-bottom: 1px dotted rgb(222, 224, 40);
+	
+	color: rgb(222, 224, 40);
+	font-family: verdana,  serif;
+	font-size: 10px;
+}
+
+#login-box div.vs {
+margin-top: 10px;
+}
+
+#login-box div.sb {
+margin-top: 6px;
+}
+
+
+
+#ere {
+margin-top: 7px;
+	color: rgb(210, 210,210);
+	font-family: verdana, sans-serif;
+	font-size: 12px;
+}
+
+#ere div.logo {
+margin: 0px;
+}
+
+#ere div.txt {
+margin-top: 3px;
+margin-left: 5px;
+
+float: left;
+width: 550px;
+text-align: left;
+}
+
+#ere div.txt div.bl {
+	margin-top: 3px;
+	margin-bottom: 10px;
+}
+
+#ere div.txt div.title {
+font-family: garamond,  serif;
+	font-size: 18px;
+	color: rgb(118, 114, 156);
+	letter-spacing: 2px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+

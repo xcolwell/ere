@@ -1,0 +1,216 @@
+<project name="ere" default="help" basedir=".">
+	<target name="help">
+<echo>ENTER &amp; RE-EXIT
+resisttheborg 2007
+</echo>
+	</target>
+	
+	
+	
+	<!--
+	****************************************************
+	* BEGIN PROPERTIES 
+	****************************************************
+	-->
+	
+
+	<property file="conf/build.properties"/>
+	
+	<property 	name  ="version"
+				value ="internal" />
+	
+	<property 	name  ="dist" 			
+				value ="dist" />
+	
+	<property 	name  ="conf"
+				value ="conf" />
+	
+	<property 	name  ="dist-temp" 
+				value ="dist/temp" />
+	
+	<property 	name  ="src-java"
+				value ="src/java" />
+	
+	<property 	name  ="jar_name"
+				value ="ere_${version}.jar" />
+	
+	<property 	name  ="web-lib"
+				value ="web/lib" />
+	
+	
+	<path id="core-cp">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+			<exclude name="jogl/**"/>
+			<exclude name="dev_only/**"/>
+			<exclude name="lf/**"/>
+		</fileset>
+	</path>
+	
+	<path id="compile-cp">
+		<path refid="core-cp"/>
+		<fileset dir="lib">
+			<include name="jogl/**/*.jar"/>
+			<include name="dev_only/**/*.jar"/>
+			<include name="lf/**/*.jar"/>
+		</fileset>
+	</path>
+	<property name="compile-cp-prop" refid="compile-cp"/>
+	
+
+	<!--
+	****************************************************
+	* END PROPERTIES
+	****************************************************
+	-->
+		
+	
+	<!--
+	    CUSTOM TASKS
+	    -->
+		
+	  <taskdef name="groovy" 
+	 	classname="org.codehaus.groovy.ant.Groovy"
+	    classpathref="compile-cp"/>
+		
+	  <!--
+	    END CUSTOM TASKS
+	    -->
+	
+	
+	<!--
+	****************************************************
+	* BEGIN BUILD 
+	****************************************************
+	-->
+	
+	<target name="clean">
+		<delete dir="${dist}"/>
+		<delete dir="${dist-temp}"/>
+	</target>
+	
+	<!-- Ensures the dist-temp and dist directories are created -->
+	<target name="init-dirs">
+		<mkdir dir="${dist}"/>
+		<mkdir dir="${dist-temp}"/>
+	</target>
+	
+	<target name="copy-all">
+		<copy todir="${dist-temp}">
+			<fileset dir="${src-java}">
+				<exclude name="**/*.java"/>
+			</fileset>
+			<fileset dir="resources">
+				<include name="**"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="compile">
+		<!--<echo message="${compile-cp-prop}"/>-->
+		<javac srcdir="${src-java}" destdir="${dist-temp}" classpathref="compile-cp" source="1.5" target="1.5"/>
+	</target>
+	
+	<target name="dist" depends="clean, init-dirs, copy-all, compile, flattenLibs">
+		<jar basedir="${dist-temp}" destfile="${dist}/${jar_name}" compress="true" level="9">
+		</jar>
+		<delete dir="${dist-temp}"/>
+	</target>
+	
+	<target name="deploy" depends="dist">
+		<copy file="${dist}/${jar_name}" todir="${web-lib}">
+		</copy>
+		<copy todir="${web-lib}">
+			<fileset dir="resources"></fileset>
+			</copy>
+	</target>
+	
+	<target name="write-cp" depends="init-dirs">
+		<echo message="${compile-cp-prop};${dist}/${jar_name}" 
+			file="cp.txt" append="no"/>
+	</target>
+	
+	
+	<target name="flattenLibs">
+	  	<mkdir dir="${dist-temp}"/>
+	  	<groovy>
+	  		import java.io.*;
+	  		import java.util.zip.*;
+	  		import java.util.jar.*;
+	  		
+	  		
+	  		def copyBinary(isDir, dfile, is) {
+	  			def file = new File( dfile )
+		  	
+	  			if ( isDir ) {
+	  				file.mkdirs()
+	  			}
+	  			else {
+	  				def preIndex = Math.max( dfile.lastIndexOf( "/" ), dfile.lastIndexOf( "\\" ) )
+	  				if ( preIndex > 0 )
+	  					new File( dfile.substring( 0, preIndex + 1 ) ).mkdirs()
+	  				
+		  			def fout = new BufferedOutputStream( new FileOutputStream( file ) )
+		  			
+		  			try {
+			  			byte[] buffer = new byte[ 1024 ]
+		  				int i
+			  			while ( ( i = is.read( buffer, 0, buffer.length ) ) > 0 )
+			  				fout.write( buffer, 0, i )
+	  					fout.close()
+		  			}
+		  			finally {
+		  				fout.close()
+		  			}
+	  			}
+	  		}
+	  		
+	  		
+	  		def destDir = project.getProperty( "dist-temp" )
+	  		if ( destDir.endsWith( "\\" ) || destDir.endsWith( "/" ) )
+	  			destDir = destDir.subString( 0, destDir.length() - 1 )
+	  		
+	  		
+	  		// Look at "core-cp"
+			def libs = []
+	  		
+	  		project.getReference( "core-cp" ).list().each { pe ->
+	  			if ( pe.endsWith( ".jar" ) )
+	  				libs.add( pe )
+		  	}
+	  		
+	  		
+	  		def noisy = "true".equalsIgnoreCase( project.getProperty( "noisy" ) )
+	  		
+	  		// Copy:
+	  		libs.each { lib ->
+	  			def jfile = new JarFile( new File( lib ) )
+		
+	  			def e = jfile.entries()
+	  			while ( e.hasMoreElements() ) {
+	  				def entry = e.nextElement()
+	  				def name = entry.getName()
+	  		
+	  				if ( noisy )
+	  					println "Copying \"${name}\" ..."
+	  		
+	  				def is = new BufferedInputStream( jfile.getInputStream( entry ) )
+	  				try {
+	  					copyBinary( entry.isDirectory(), "${destDir}/${name}", is )
+	  				}
+	  				finally {
+	  					is.close()
+	  				}
+	  			}
+	  		}
+	  	</groovy>
+	  </target>
+	
+
+	<!--
+	****************************************************
+	* END BUILD 
+	****************************************************
+	-->
+	
+</project>

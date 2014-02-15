@@ -1,0 +1,89 @@
+
+#cell-outer-container {
+	margin-top: 50px;
+margin-left: 0px;
+margin-right: 0px;
+margin-bottom: 10px;
+
+}
+
+#cell-outer-container div.title {
+margin-left: 5px;
+margin-bottom: 8px;
+font-family: garamond,  serif;
+	font-size: 18px;
+	color: rgb(118, 114, 156);
+	letter-spacing: 2px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+#cell-container {
+
+position: relative;
+}
+
+#cell-container div.cell {
+	float: left;
+	width: 20%;
+	height: 200px;
+}
+
+#cell-container div.hcell {
+	position: absolute;
+	width: 200px;
+	height: 200px;
+left: 0px;
+top: 0px;
+z-index: 10;
+
+/*border-right: 12px solid rgb(232, 218, 0);
+*/
+opacity:0.6;filter:alpha(opacity=60);
+}
+
+#close { 
+	display: none;
+	/*position: absolute;
+	left: 400px;
+top: 160px;*/
+}
+
+
+#cell-outer-container a {
+	font-family: impact, sans-serif;
+	font-size: 32px;
+	color: rgb(255, 255, 255);
+border: none;
+text-decoration: none;
+
+	background-image: url('../images/bg_b.png');
+}
+
+#cell-outer-container a:hover {
+background-image: url('../images/bg_r.png');
+}
+
+#cell-container div.cell img, #cell-container div.hcell img {
+	width: 100%;
+	height: 100%;
+}
+
+#cell-container div.cell table {
+	width: 100%;
+height: 100%;
+border: none;
+}
+
+#cell-container div.cell table tr {
+	vertical-align: middle;
+}
+
+#cell-container div.cell table tr td {
+	text-align: center;
+}
+
+#cell-container div.cell table tr td img {
+	width: 200px;
+height: 200px;
+}
